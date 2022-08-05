@@ -1,7 +1,6 @@
 package com.decagon.dispatchbuddy.services;
 import com.decagon.dispatchbuddy.entities.User;
 import com.decagon.dispatchbuddy.pojos.APIResponse;
-import com.decagon.dispatchbuddy.pojos.UserRequest;
 import com.decagon.dispatchbuddy.pojos.UserRequestWithUsername;
 import com.decagon.dispatchbuddy.repositories.UserRepository;
 import com.decagon.dispatchbuddy.util.App;
@@ -11,10 +10,13 @@ import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +29,26 @@ public class MessagingService {
     @Autowired
     private RestTemplate rest;
     private final UserRepository userRepository;
-    //@Value("${lenos.twilio.id}")
-    private String twilioId="ACc404d34ef1992f4ee102d14d52327775";
-    //@Value("${lenos.twilio.token}")
-    private String twilioToken="6ddb3dba8963812daf0bacef37005bc2";
-    //@Value("${lenos.twilio.number}")
-    private String twilioNumber="+12243026369";
-    private String smsBaseURL="https://www.bulksmsnigeria.com/api/v1/sms/create";
-    private String smsToken="Ak2NPcmNEq4p3GCfK2Ecv6tQA68nslopTnnNZhF91XSz5NgdrYylS855rbc1";
+    @Value("${twilio.id}")
+    private String twilioId;
+    @Value("${twilio.token}")
+    private String twilioToken;
+    @Value("${twilio.number}")
+    private String twilioNumber;
+    @Value("bulksmsnigeria.baseURL")
+    private String smsBaseURL;
+    @Value("bulksmsnigeria.smsToken")
+    private String smsToken;
+
+//    @Value("whatsapp.accessKey")
+    private String whatsappAccessKey="Bearer EAAKh4CBRdIIBAP9lVEtOhb7uUs0oFhLuFSs5BvVEfdqzM29eZBWsrC4HL5ahh7YBuiZAr3txYUZA2EdZCUg0klVkNvkblK6UvAPaxjb4vdT9r9gs8gUNA7ZC65h5EdZCXrtxLjtLgWKZC9VDZBpycVfydkD3iU98eR7iOnQmZBEr7cthKgffaa1xz";
+//    @Value("whatsapp.baseURL")
+    private String whatsappBaseURL="https://graph.facebook.com/v14.0/101883642540294/messages";
+
+
+
+
+
     private final LocalStorageService memcached;
 
 
@@ -83,6 +97,33 @@ public class MessagingService {
             return new APIResponse(ex.getMessage(), false, null);
         }
     }
+
+    public APIResponse sendWhatsappMessage(String recipient, String textMessage) {
+        recipient=app.getFormattedNumber(recipient).substring(1);
+        app.print(""+recipient);
+        app.print(""+textMessage);
+        app.print("Whatsapp Message Sending...");
+        try {
+
+            String requestBody="{\"messaging_product\":\"whatsapp\",\"to\":\""+recipient+"\",\"type\":\"template\",\"template\":{\"name\":\"dispatch_buddy_access_token\",\"language\":{\"code\":\"en_US\"},\"components\":[{\"type\":\"body\",\"parameters\":[{\"type\":\"text\",\"text\":\""+textMessage+"\"}]}]}}";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization",whatsappAccessKey);
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<String> response = rest.exchange(whatsappBaseURL, HttpMethod.POST, entity, String.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                app.print("Message Sent");
+                return new APIResponse("Message Sent", true, response.getBody());
+            } else {
+                app.print("Failed");
+                return new APIResponse("Failed to send Message", false, response.getBody());
+            }
+        }catch (Exception ex){
+            app.print("Unable to send Message");
+            ex.printStackTrace();
+            return new APIResponse(ex.getMessage(), false, null);
+        }
+    }
     public APIResponse sendQuickSMS(String recipient,String textMessage){
         recipient=app.getFormattedNumber(recipient);
         app.print(""+recipient);
@@ -109,7 +150,7 @@ public class MessagingService {
             Long otp=app.generateOTP();
             memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
             //send SMS
-            APIResponse messengerResponse= this.sendQuickSMS(appUser.getPhoneNumber(),"Your dispatchbuddy OTP is "+otp);
+            APIResponse messengerResponse= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
              if(!messengerResponse.isSuccess())
                 return response.failure("Unable to send OTP");
              else

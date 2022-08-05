@@ -11,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 
 @Document("users")
@@ -57,6 +58,7 @@ public class User implements Serializable {
 
     @Enumerated(EnumType.STRING)
     UserRole role;
+    Set<String> coveredLocations;
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Temporal(TemporalType.TIMESTAMP)

@@ -27,11 +27,11 @@ public class App {
         }
     }
 
-    public  long generateSerialNumber(int prefix) {
+    public  String generateSerialNumber(String prefix) {
         Random rand = new Random();
         long x = (long)(rand.nextDouble()*100000000000000L);
         String s = prefix + String.format("%014d", x);
-        return Long.valueOf(s);
+        return s;
     }
 
     public String makeUIID() {

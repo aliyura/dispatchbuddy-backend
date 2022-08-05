@@ -5,6 +5,7 @@ import com.decagon.dispatchbuddy.enums.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,9 @@ public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByEmailOrPhoneNumber(String email, String phoneNumber);
 
     Optional<User> findByUuid(String uuid);
+
+    @Query(value="{'coveredLocations': ?0, 'coveredLocations': ?1}")
+    Page<User> searchRider(String from, String to, Pageable pageable);
 
     Boolean existsByEmail(String email);
 

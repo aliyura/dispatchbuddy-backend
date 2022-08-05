@@ -16,6 +16,7 @@ public class AppController {
 
     @GetMapping("/ping")
     public APIResponse<String> ping() {
+        messagingService.sendWhatsappMessage("+2348064160204","1234");
         return new APIResponse<String>("success", true, "I am alive");
     }
 

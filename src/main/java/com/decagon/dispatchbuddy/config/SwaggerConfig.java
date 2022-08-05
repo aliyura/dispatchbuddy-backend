@@ -10,7 +10,6 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import springfox.documentation.swagger2.annotations.EnableSwagger2WebFlux;
 
 @Configuration
 @EnableSwagger2
@@ -26,8 +25,8 @@ public class SwaggerConfig {
     
      private ApiInfo metaData() {
         return new ApiInfoBuilder()
-                 .title("Lenos Shopping App")
-                .description("The APIs have been built by Rabiu Aliyu, CEO/founder Lenos Nigeria.")
+                 .title("Dispatchbuddy App")
+                .description("The APIs have been built by Rabiu Aliyu, Hope Chijuka, David Baba")
                 .version("0.0.1")
                 .license("Apache License Version 1.0")
                 .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0\"")

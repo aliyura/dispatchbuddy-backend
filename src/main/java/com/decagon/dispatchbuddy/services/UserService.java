@@ -11,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -209,7 +209,37 @@ public class UserService {
         }
     }
 
+    public APIResponse addLocationToCover(OAuth2Authentication authentication,AddLocationRequest request){
+        User authorizedUser=authDetails.getAuthorizedUser(authentication);
+        User user = userRepository.findByUuid(authorizedUser.getUuid()).orElse(null);
+        Set<String> locations = new HashSet<>();
+        Set<String> existingLocations=authorizedUser.getCoveredLocations();
+        String []currentLocations=request.getLocations();
+        if(request.getLocations()==null || request.getLocations().length<=0)
+            return  response.failure("Location can't be empty");
 
+        if(existingLocations!=null){
+            locations=existingLocations;
+        }
+        for (String currentLocation : currentLocations) {
+            locations.add(currentLocation);
+        }
+
+        user.setCoveredLocations(locations);
+        user.setLastModifiedDate( new Date());
+
+        userRepository.save(user);
+        return  response.success(user);
+
+    }
+
+    public  APIResponse searchRider(int page, String from, String to){
+        Page pageData = userRepository.searchRider(from,to, PageRequest.of(page,20));
+        if(pageData.isEmpty())
+             return  response.failure("No rider in this location");
+        else
+            return  response.success(pageData);
+    }
     public APIResponse updateUserProfilePictureById(OAuth2Authentication authentication, MultipartFile image) {
         User user=authDetails.getAuthorizedUser(authentication);
         if (user != null) {
@@ -235,8 +265,6 @@ public class UserService {
         }
     }
 
-
-
     public APIResponse updateUserStatusById(String userId, Status status) {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null) {
@@ -250,7 +278,6 @@ public class UserService {
                     messagingService.sendSMS(user.getPhoneNumber(), "Congratulations! Your dispatcher account has been approved, you can now login to your dashboard");
                 }
             }
-
             return response.success(userRepository.save(user));
         } else {
             return response.failure("Account not found");

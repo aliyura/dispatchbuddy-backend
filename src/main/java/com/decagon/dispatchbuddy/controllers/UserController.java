@@ -42,7 +42,7 @@ public class UserController {
         return userService.verifyUser(verificationRequest);
     }
 
-    @PostMapping("/user/reset-password")
+    @PostMapping("/user/password-reset")
     public APIResponse<User> resetPassword(@RequestBody UserRequest userPasswordResetRequest){
         return userService.resetPassword(userPasswordResetRequest);
     }
