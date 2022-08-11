@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
@@ -234,7 +235,7 @@ public class UserService {
     }
 
     public  APIResponse searchRider(int page, String from, String to){
-        Page pageData = userRepository.searchRider(from,to, PageRequest.of(page,20));
+        Page pageData = userRepository.searchRider(from,to, PageRequest.of(page,20, Sort.by("createdDate").descending()));
         if(pageData.isEmpty())
              return  response.failure("No rider in this location");
         else

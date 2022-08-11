@@ -17,17 +17,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class RiderService {
@@ -80,6 +74,32 @@ public class RiderService {
         }
     }
 
+    public APIResponse updateRequest(String requestId, UpdateRequest request) {
+        Request existingRequest = requestRepository.findById(requestId).orElse(null);
+        if (existingRequest == null)
+            return response.failure("Unable to find this request ");
+
+        if (request.getSize() != null)
+            existingRequest.setSize(request.getSize());
+        if (request.getDistance() != null)
+            existingRequest.setDistance(request.getDistance());
+        if (request.getPayableAmount() != null)
+            existingRequest.setPayableAmount(request.getPayableAmount());
+        if (request.getPickupLocation() != null)
+            existingRequest.setPickupLocation(request.getPickupLocation());
+        if (request.getDestination() != null)
+            existingRequest.setDestination(request.getDestination());
+
+        existingRequest.setLastModifiedDate(new Date());
+
+        Request savedRequest = requestRepository.save(existingRequest);
+        if (savedRequest != null) {
+            return response.success(savedRequest);
+        } else {
+            return response.failure("Unable to update request!");
+        }
+    }
+
     public APIResponse updateRequestStatus(String requestId, Status status, String statusReason) {
         Request request = requestRepository.findById(requestId).orElse(null);
         List<Request> requestList = requestRepository.findAllByStatus(Status.AC);
@@ -98,7 +118,7 @@ public class RiderService {
     }
     public APIResponse getRequests(OAuth2Authentication authentication, int page) {
         User rider = authDetails.getAuthorizedUser(authentication);
-        Page<Request> request = requestRepository.findAllByRiderUuid(rider.getUuid(),PageRequest.of(page,20));
+        Page<Request> request = requestRepository.findAllByRiderUuid(rider.getUuid(),PageRequest.of(page,20, Sort.by("createdDate").descending()));
         if (!request.isEmpty()) {
             return response.success(request);
         } else {

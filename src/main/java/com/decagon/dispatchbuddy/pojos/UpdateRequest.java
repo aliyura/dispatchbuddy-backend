@@ -6,13 +6,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestRider<T> {
-    private String name;
-    private String email;
-    private String phone;
+public class UpdateRequest<T> {
     private String pickupLocation;
     private String destination;
-    private String riderUuid;
     private Double payableAmount;
     private String size;
     private String distance;

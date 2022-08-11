@@ -32,7 +32,9 @@ public class Request implements Serializable {
     private String riderName;
     private String riderUuid;
     private String riderPhone;
-
+    private Double payableAmount;
+    private String size;
+    private String distance;
     @Enumerated(EnumType.STRING)
     Status status;
     private String statusReason;

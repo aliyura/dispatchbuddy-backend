@@ -19,7 +19,6 @@ public class RiderController {
 
     private final UserService userService;
     private  final RiderService riderService;
-    private final MessagingService messagingService;
 
     @PostMapping("/rider/add-locations")
     public APIResponse<User> addLocationsToCover(OAuth2Authentication authentication,@RequestBody AddLocationRequest request){
@@ -36,11 +35,15 @@ public class RiderController {
         return riderService.requestRider(requestRider);
     }
 
+    @PostMapping("/rider/update-request/{id}")
+    public APIResponse<Request> updateRider(@RequestBody UpdateRequest requestRider, @PathVariable("id") String requestId){
+        return riderService.updateRequest(requestId,requestRider);
+    }
+
     @PostMapping("/rider/accept-request/{id}")
     public APIResponse<Request> acceptRequest(@PathVariable("id") String requestId){
        return riderService.updateRequestStatus(requestId, Status.AC,"Accepted");
     }
-
     @PostMapping("/rider/close-request/{id}")
     public APIResponse<Request> closeRequest(@PathVariable("id") String requestId){
         return riderService.updateRequestStatus(requestId, Status.CO,"Closed");
