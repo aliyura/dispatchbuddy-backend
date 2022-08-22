@@ -150,8 +150,10 @@ public class MessagingService {
             Long otp=app.generateOTP();
             memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
             //send SMS
-            APIResponse messengerResponse= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
-             if(!messengerResponse.isSuccess())
+//            APIResponse messengerResponseWhatsapp= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
+            APIResponse messengerResponsePhoneNo= this.sendSMS(appUser.getPhoneNumber(),otp.toString());
+
+             if(!messengerResponsePhoneNo.isSuccess())
                 return response.failure("Unable to send OTP");
              else
                return response.success("OTP sent to "+appUser.getPhoneNumber());
