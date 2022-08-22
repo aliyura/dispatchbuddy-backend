@@ -148,13 +148,10 @@ public class MessagingService {
         User appUser = userRepository.findByEmail(userRequest.getUsername()).orElse(userRepository.findByPhoneNumber(userRequest.getUsername()).orElse(null));
         if (appUser != null) {
             Long otp=app.generateOTP();
-//            memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
-            memcached.save(appUser.getUuid(), String.valueOf(otp), 360);
+            memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
             //send SMS
-            APIResponse messengerResponseWhatsapp= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
-//            APIResponse messengerResponsePhoneNo= this.sendSMS(appUser.getPhoneNumber(),otp.toString());
-
-             if(!messengerResponseWhatsapp.isSuccess())
+            APIResponse messengerResponse= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
+             if(!messengerResponse.isSuccess())
                 return response.failure("Unable to send OTP");
              else
                return response.success("OTP sent to "+appUser.getPhoneNumber());
