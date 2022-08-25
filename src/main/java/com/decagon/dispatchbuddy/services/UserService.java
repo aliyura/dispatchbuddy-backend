@@ -72,12 +72,13 @@ public class UserService {
             user.setUuid(app.makeUIID());
             user.setAuthProvider(AuthProvider.EMAIL);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setOtp(app.generateOTP().toString());
             User savedUser = userRepository.save(user);
             if (savedUser != null) {
                 UserRequestWithUsername request = new UserRequestWithUsername();
                 request.setUsername(user.getPhoneNumber()!=null?user.getPhoneNumber():user.getEmail());
                 messagingService.generateAndSendOTP(request);
-                return response.success(savedUser);
+                return response.success("You have signed up successfully, proceed to verify your account");
             }
             else{
                 return response.failure("Unable to create Account!");
@@ -111,6 +112,7 @@ public class UserService {
                 .thirdPartyToken(thirdPartyOauthResponse.getIdToken())
                 .authProvider(AuthProvider.GOOGLE)
                 .role(UserRole.USER)
+                .otp(app.generateOTP().toString())
                 .accountType(AccountType.DISPATCHER)
                 .authProvider(request.getAuthProvider()).build();
 
@@ -129,7 +131,8 @@ public class UserService {
                 userRepository.findByEmail(request.getUsername()).orElse(null)
         );
         if (user != null) {
-            String otp= memcached.getValueByKey(user.getUuid());
+//            String otp= memcached.getValueByKey(user.getUuid());
+            String otp= user.getOtp();
             app.print("Stored OTP:"+otp);
             app.print("Provided OTP:"+request.getOtp());
 
@@ -339,5 +342,24 @@ public class UserService {
         if(user!=null)
           userRepository.deleteById(userId);
         return response.success(user);
+    }
+
+
+    public APIResponse generateAndMailOTP(UserRequestWithUsername userRequest) {
+
+        User appUser = userRepository.findByEmail(userRequest.getUsername()).orElse(null);
+        if (appUser != null) {
+            String otp = appUser.getOtp();
+//            memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
+            GmailDTO mail = GmailDTO.builder()
+                    .subject("VERIFICATION OTP")
+                    .body(otp)
+                    .toAddresses(appUser.getEmail())
+                    .build();
+            APIResponse messengerResponse= messagingService.sendMail(mail);
+            return response.success("OTP sent to "+appUser.getEmail());
+        } else {
+            return response.failure("Account not found");
+        }
     }
 }

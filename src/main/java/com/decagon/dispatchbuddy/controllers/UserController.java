@@ -1,7 +1,6 @@
 package com.decagon.dispatchbuddy.controllers;
 import com.decagon.dispatchbuddy.entities.User;
 import com.decagon.dispatchbuddy.enums.AuthProvider;
-import com.decagon.dispatchbuddy.enums.Status;
 import com.decagon.dispatchbuddy.pojos.*;
 import com.decagon.dispatchbuddy.services.MessagingService;
 import com.decagon.dispatchbuddy.services.UserService;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.IOException;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -33,8 +30,8 @@ public class UserController {
     }
 
     @PostMapping("/user/validate")
-    public APIResponse<User> validateUser(@RequestBody UserRequestWithUsername request){
-        return messagingService.generateAndSendOTP(request);
+    public APIResponse validateUser(@RequestBody UserRequestWithUsername request){
+        return userService.generateAndMailOTP(request);
     }
 
     @PostMapping("/user/verify")
@@ -85,5 +82,10 @@ public class UserController {
     @GetMapping("/user/get-all-by-account_type")
     public APIResponse<List<User>> getUsersByAccountType(@RequestParam String type, @RequestParam int page, @RequestParam int size){
         return userService.findUsersByAccountType(PageRequest.of(page,size, Sort.by("id").descending()),type);
+    }
+
+    @PostMapping("/user/sendmail")
+    public APIResponse sendMail(@RequestBody GmailDTO gmailDTO){
+        return messagingService.sendMail(gmailDTO);
     }
 }

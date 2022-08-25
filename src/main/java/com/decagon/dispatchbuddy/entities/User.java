@@ -48,6 +48,7 @@ public class User implements Serializable {
     private String thirdPartyToken;
 
     private Boolean isEnabled = true;
+    private String otp;
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
     @Enumerated(EnumType.STRING)

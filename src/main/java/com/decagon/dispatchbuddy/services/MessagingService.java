@@ -1,6 +1,7 @@
 package com.decagon.dispatchbuddy.services;
 import com.decagon.dispatchbuddy.entities.User;
 import com.decagon.dispatchbuddy.pojos.APIResponse;
+import com.decagon.dispatchbuddy.pojos.GmailDTO;
 import com.decagon.dispatchbuddy.pojos.UserRequestWithUsername;
 import com.decagon.dispatchbuddy.repositories.UserRepository;
 import com.decagon.dispatchbuddy.util.App;
@@ -8,15 +9,23 @@ import com.decagon.dispatchbuddy.util.Response;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +55,8 @@ public class MessagingService {
     private String whatsappBaseURL="https://graph.facebook.com/v14.0/101883642540294/messages";
 
 
-
-
-
+    @Autowired  @Qualifier("gmail")
+    private JavaMailSender mailSender;
     private final LocalStorageService memcached;
 
 
@@ -150,8 +158,16 @@ public class MessagingService {
             Long otp=app.generateOTP();
             memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
             //send SMS
-            APIResponse messengerResponse= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
-             if(!messengerResponse.isSuccess())
+//            APIResponse messengerResponse= this.sendWhatsappMessage(appUser.getPhoneNumber(),otp.toString());
+            //Send Mail
+            GmailDTO mail = GmailDTO.builder()
+                    .subject("VERIFICATION OTP")
+                    .body(otp.toString())
+                    .toAddresses(appUser.getEmail())
+                    .build();
+            APIResponse messengerResponse= this.sendMail(mail);
+
+            if(!messengerResponse.isSuccess())
                 return response.failure("Unable to send OTP");
              else
                return response.success("OTP sent to "+appUser.getPhoneNumber());
@@ -166,6 +182,26 @@ public class MessagingService {
         }catch (Exception ex){
             ex.printStackTrace();
             return response.failure(ex.getMessage());
+        }
+    }
+
+
+
+    public APIResponse sendMail(GmailDTO gmailDTO) {
+        MimeMessagePreparator preparator = mimeMessage -> {
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+            message.setTo(gmailDTO.getToAddresses());
+            message.setFrom("dispatchbuddy@gmail.com");
+            message.setSubject(gmailDTO.getSubject());
+            message.setText(gmailDTO.getBody(), true);
+        };
+
+        try {
+            mailSender.send(preparator);
+            String sent = "Email sent successfully To "+gmailDTO.getToAddresses();
+            return  response.success(sent);
+        } catch (MailException e) {
+            return response.failure("Mail not send because: "+e.getMessage());
         }
     }
 }
