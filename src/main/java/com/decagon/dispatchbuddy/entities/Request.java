@@ -6,6 +6,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Document("requests")
 @Getter
@@ -38,6 +40,8 @@ public class Request implements Serializable {
     @Enumerated(EnumType.STRING)
     Status status;
     private String statusReason;
+    @OneToMany(mappedBy = "dispatcher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DispatcherRating> rating = new HashSet<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;

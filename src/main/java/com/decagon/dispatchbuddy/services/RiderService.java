@@ -53,17 +53,17 @@ public class RiderService {
         else {
 
             Request requestRider = new Request();
-            requestRider.setRiderName(rider.getName());
-            requestRider.setRiderUuid(rider.getUuid());
-            requestRider.setRiderPhone(rider.getPhoneNumber());
-            requestRider.setUserName(request.getName());
-            requestRider.setUserEmail(request.getEmail());
-            requestRider.setUserPhoneNumber(request.getPhone());
-            requestRider.setPickupLocation(request.getPickupLocation());
-            requestRider.setDestination(request.getDestination());
-            requestRider.setStatus(Status.PC);
-            requestRider.setRequestId(app.generateSerialNumber("REQ"));
-            requestRider.setCreatedDate(new Date());
+                    requestRider.setRiderName(rider.getName());
+                    requestRider.setRiderUuid(rider.getUuid());
+                    requestRider.setRiderPhone(rider.getPhoneNumber());
+                    requestRider.setUserName(request.getName());
+                    requestRider.setUserEmail(request.getEmail());
+                    requestRider.setUserPhoneNumber(request.getPhone());
+                    requestRider.setPickupLocation(request.getPickupLocation());
+                    requestRider.setDestination(request.getDestination());
+                    requestRider.setStatus(Status.PC);
+                    requestRider.setRequestId(app.generateSerialNumber("REQ"));
+                    requestRider.setCreatedDate(new Date());
 
             Request savedRequest = requestRepository.save(requestRider);
             if (savedRequest != null) {

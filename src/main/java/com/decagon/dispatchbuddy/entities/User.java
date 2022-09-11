@@ -11,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -70,6 +71,8 @@ public class User implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
+    @OneToMany(mappedBy = "dispatcher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DispatcherRating> rating = new HashSet<>();
 
 
 

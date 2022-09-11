@@ -336,6 +336,11 @@ public class UserService {
         return user != null ? response.success(user) : response.failure("User not found");
     }
 
+    public APIResponse getAllUsers(Pageable pageable) {
+        Page<List<User>>  users = userRepository.findAllUser(pageable);
+        return users != null ? response.success(users) : response.failure("No user found");
+    }
+
 
     public APIResponse deleteUerById(String userId){
         User user = userRepository.findById(userId).orElse(null);
@@ -351,12 +356,14 @@ public class UserService {
         if (appUser != null) {
             String otp = appUser.getOtp();
 //            memcached.save(appUser.getUuid(), String.valueOf(otp), 0);
+            appUser.setOtp(otp);
             GmailDTO mail = GmailDTO.builder()
                     .subject("VERIFICATION OTP")
                     .body(otp)
                     .toAddresses(appUser.getEmail())
                     .build();
             APIResponse messengerResponse= messagingService.sendMail(mail);
+            userRepository.save(appUser);
             return response.success("OTP sent to "+appUser.getEmail());
         } else {
             return response.failure("Account not found");

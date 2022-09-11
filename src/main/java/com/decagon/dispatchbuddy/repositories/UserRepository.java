@@ -30,6 +30,8 @@ public interface UserRepository extends MongoRepository<User, String> {
     Boolean existsByEmailOrPhoneNumber(String email, String phoneNumber);
 
     Page<List<User>> findAllByRole(Pageable pageable, UserRole role);
+    Page<List<User>> findAllUser(Pageable pageable);
+
 
     Page<List<User>> findAllByAccountType(Pageable pageable, AccountType type);
 }

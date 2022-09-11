@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -14,6 +15,11 @@ import java.util.regex.Pattern;
 @Service
 public class App {
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final Response response;
+
+    public App(Response response) {
+        this.response = response;
+    }
 
     public void log(String message) {
         logger.info(message);
@@ -104,5 +110,11 @@ public class App {
     public ObjectMapper getMapper(){
         ObjectMapper mapper= new ObjectMapper();
         return mapper;
+    }
+
+    public String rating2DCP(Double rating){
+        DecimalFormat df_obj = new DecimalFormat("#.#");
+        String val = df_obj.format(rating);
+        return val;
     }
 }
