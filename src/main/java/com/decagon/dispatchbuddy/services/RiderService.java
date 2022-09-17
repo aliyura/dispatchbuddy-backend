@@ -34,6 +34,7 @@ public class RiderService {
     private final AuthDetails authDetails;
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final MessagingService messagingService;
 
 
     public APIResponse requestRider(RequestRider request) {
@@ -67,6 +68,16 @@ public class RiderService {
 
             Request savedRequest = requestRepository.save(requestRider);
             if (savedRequest != null) {
+                String requestDetails = "Hi "+rider.getName() + ", a request has been made by: "+ request.getName()+"" +
+                        " from: "+request.getPickupLocation()+", to be delivered at the destination:" +request.getDestination()+ "." +
+                        " Contact the request person through the number: " + request.getPhone()+ ".";
+                GmailDTO mail = GmailDTO.builder()
+                        .subject("REQUEST PLACED")
+                        .body(requestDetails)
+                        .toAddresses(rider.getEmail())
+                        .build();
+                messagingService.sendMail(mail);
+
                 return response.success(savedRequest);
             } else {
                 return response.failure("Unable to contact Rider!");
