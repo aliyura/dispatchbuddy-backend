@@ -22,6 +22,5 @@ public interface RequestRepository extends MongoRepository<Request, String> {
 
     Optional<Request> findByRiderUuid(String uuid);
     Page<Request> findAllByRiderUuid(String riderUuid, Pageable pageable);
-
-    List<Request> findAllByStatus(Status status);
+    List<Request> findAllByRiderUuidAndStatus(String riderUuid, Status status);
 }
