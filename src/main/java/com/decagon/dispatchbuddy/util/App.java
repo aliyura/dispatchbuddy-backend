@@ -60,6 +60,14 @@ public class App {
         return email.matches(regex);
     }
 
+    public boolean validNumber(String number) {
+        if (number.startsWith("+234"))
+            number= number.replace("+234", "0");
+        Pattern pattern = Pattern.compile("^\\d{11}$");
+        Matcher matcher = pattern.matcher(number);
+        return matcher.matches();
+    }
+
     public String getFormattedNumber(String number){
         number=number.trim();
         if(number.startsWith("0"))
