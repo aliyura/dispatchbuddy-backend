@@ -105,7 +105,7 @@ public class RiderService {
         Request savedRequest = requestRepository.save(existingRequest);
         if (savedRequest != null) {
             String msg = "Hello "+" "+existingRequest.getUserName()+"Your request update are follows:"+"\n"+" Destination:"+existingRequest.getDestination()+"" +
-                    "Status: "+existingRequest.getStatus()+"\n"+" "+" Amount to Pay: "+existingRequest.getPayableAmount();
+                    "Status: "+existingRequest.getStatus()+"\n"+" "+"Amount to Pay: "+existingRequest.getPayableAmount();
             GmailDTO mail = GmailDTO.builder()
                     .subject("REQUEST UPDATE ORDER")
                     .body(msg)
@@ -129,6 +129,13 @@ public class RiderService {
             request.setStatus(status);
             request.setStatusReason(statusReason);
             request.setLastModifiedDate(new Date());
+            String msg = "Your request to "+" "+request.getDestination()+"with id: "+request.getRequestId()+" has been delivered";
+            GmailDTO mail = GmailDTO.builder()
+                    .subject("REQUEST DELIVERED")
+                    .body(msg)
+                    .toEmail(request.getUserEmail())
+                    .build();
+            messagingService.sendMail(mail);
             return response.success(requestRepository.save(request));
         } else {
             return response.failure("Request not found");
