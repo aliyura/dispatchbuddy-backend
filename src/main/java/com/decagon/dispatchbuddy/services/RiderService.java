@@ -102,7 +102,7 @@ public class RiderService {
 
     public APIResponse updateRequestStatus(String requestId, Status status, String statusReason) {
         Request request = requestRepository.findById(requestId).orElse(null);
-        List<Request> requestList = requestRepository.findAllByStatus(Status.AC);
+        List<Request> requestList = requestRepository.findAllByRiderUuidAndStatus(request.getRiderUuid(), Status.AC);
         if (!requestList.isEmpty() && status == Status.AC)
             return response.failure("You already have an active ride");
 

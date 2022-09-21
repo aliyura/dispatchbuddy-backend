@@ -56,8 +56,6 @@ public class UserService {
             return response.failure("Account already exist!");
         else if (!app.validEmail(user.getEmail()))
             return response.failure("Invalid Email Address!");
-        else if (!app.validNumber(user.getPhoneNumber()))
-            return response.failure("Invalid Mobile Number!");
         else {
 
             if (user.getAccountType() == null)
@@ -183,15 +181,10 @@ public class UserService {
                 user.setGender(newDetails.getGender());
 
             if (newDetails.getPhoneNumber() != null) {
-                if(app.validNumber(newDetails.getPhoneNumber())) {
                     User appUser=userRepository.findByPhoneNumber(newDetails.getPhoneNumber()).orElse(null);
                     if(appUser==null || appUser.getId()==user.getId()) {
                         user.setPhoneNumber(newDetails.getPhoneNumber());
                     }
-                }
-                else{
-                    return  response.failure("Account already exist with this phone number");
-                }
             }
             if (newDetails.getEmail() != null) {
                 if(app.validEmail(newDetails.getEmail())) {
@@ -337,7 +330,7 @@ public class UserService {
     }
 
     public APIResponse getAllUsers(Pageable pageable) {
-        Page<List<User>>  users = userRepository.findAllUser(pageable);
+        Page<User> users = userRepository.findAll(pageable);
         return users != null ? response.success(users) : response.failure("No user found");
     }
 
