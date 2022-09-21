@@ -34,7 +34,7 @@ public class RatingController {
     }
 
     @GetMapping("/get-all-dispatchers")
-    public APIResponse<List<User>> getAllUsers(@RequestParam int page, @RequestParam int size){
+    public APIResponse<User> getAll(@RequestParam int page, @RequestParam int size){
         return userService.getAllUsers(PageRequest.of(page,size, Sort.by("id").descending()));
     }
 }
