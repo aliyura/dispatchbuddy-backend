@@ -10,6 +10,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class GmailDTO {
     private String subject;
-    private String toAddresses;
+    private String toEmail;
     private String body;
 }

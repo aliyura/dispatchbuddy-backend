@@ -9,7 +9,6 @@ import com.decagon.dispatchbuddy.util.AuthDetails;
 import com.decagon.dispatchbuddy.util.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,7 +76,15 @@ public class UserService {
             if (savedUser != null) {
                 UserRequestWithUsername request = new UserRequestWithUsername();
                 request.setUsername(user.getPhoneNumber()!=null?user.getPhoneNumber():user.getEmail());
-                messagingService.generateAndSendOTP(request);
+
+                String msg = "Your OTP is: "+savedUser.getOtp();
+                GmailDTO mail = GmailDTO.builder()
+                        .subject("REQUEST UPDATE ORDER")
+                        .body(msg)
+                        .toEmail(savedUser.getEmail())
+                        .build();
+                messagingService.sendMail(mail);
+//                messagingService.generateAndSendOTP(request);
                 return response.success("You have signed up successfully, proceed to verify your account");
             }
             else{
@@ -337,7 +344,7 @@ public class UserService {
     }
 
     public APIResponse getAllUsers(Pageable pageable) {
-        Page<List<User>>  users = userRepository.findAllUser(pageable);
+        Page<User>  users = userRepository.findAll(pageable);
         return users != null ? response.success(users) : response.failure("No user found");
     }
 
@@ -360,7 +367,7 @@ public class UserService {
             GmailDTO mail = GmailDTO.builder()
                     .subject("VERIFICATION OTP")
                     .body(otp)
-                    .toAddresses(appUser.getEmail())
+                    .toEmail(appUser.getEmail())
                     .build();
             APIResponse messengerResponse= messagingService.sendMail(mail);
             userRepository.save(appUser);

@@ -9,9 +9,7 @@ import com.decagon.dispatchbuddy.util.Response;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +21,6 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -163,7 +158,7 @@ public class MessagingService {
             GmailDTO mail = GmailDTO.builder()
                     .subject("VERIFICATION OTP")
                     .body(otp.toString())
-                    .toAddresses(appUser.getEmail())
+                    .toEmail(appUser.getEmail())
                     .build();
             APIResponse messengerResponse= this.sendMail(mail);
 
@@ -190,7 +185,7 @@ public class MessagingService {
     public APIResponse sendMail(GmailDTO gmailDTO) {
         MimeMessagePreparator preparator = mimeMessage -> {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-            message.setTo(gmailDTO.getToAddresses());
+            message.setTo(gmailDTO.getToEmail());
             message.setFrom("dispatchbuddy@gmail.com");
             message.setSubject(gmailDTO.getSubject());
             message.setText(gmailDTO.getBody(), true);
@@ -198,7 +193,7 @@ public class MessagingService {
 
         try {
             mailSender.send(preparator);
-            String sent = "Email sent successfully To "+gmailDTO.getToAddresses();
+            String sent = "Email sent successfully To "+gmailDTO.getToEmail();
             return  response.success(sent);
         } catch (MailException e) {
             return response.failure("Mail not send because: "+e.getMessage());

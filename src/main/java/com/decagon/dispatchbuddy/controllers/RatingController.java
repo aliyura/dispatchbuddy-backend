@@ -19,16 +19,16 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(path = "rate")
+@RequestMapping(path = "api")
 public class RatingController {
     private final RatingService ratingService;
     private final UserService userService;
-    @PostMapping("/dispatcher")
+    @PostMapping("/rate-dispatcher")
     public APIResponse rateDispatcher(@RequestBody RatingDto ratingDto){
         return ratingService.rateDispatcher(ratingDto);
     }
 
-    @GetMapping("/get-all-ratings-by-dispatch-rider/{Uuid}")
+    @GetMapping("/ratings-by-dispatchrider/{Uuid}")
     public APIResponse<List<DispatcherRating>> getRatingsForDispatchRider(@PathVariable("Uuid") String Uuid, @RequestParam int page, @RequestParam int size){
         return ratingService.findDispatchRatingByUuid(PageRequest.of(page,size, Sort.by("Uuid").descending()),Uuid);
     }

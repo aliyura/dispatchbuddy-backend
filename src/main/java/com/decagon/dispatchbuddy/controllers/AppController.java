@@ -17,7 +17,7 @@ public class AppController {
     @GetMapping("/ping")
     public APIResponse<String> ping() {
 //        messagingService.sendWhatsappMessage("+2347037578524","1234");
-        return new APIResponse<String>("success", true, "I am alive");
+        return new APIResponse<String>("success", true, "I am alive and rocking!");
     }
 
     @PostMapping(value="/test", produces = {MediaType.APPLICATION_XML_VALUE}, consumes = { MediaType.ALL_VALUE})

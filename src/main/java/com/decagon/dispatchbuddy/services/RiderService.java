@@ -34,6 +34,8 @@ public class RiderService {
     private final AuthDetails authDetails;
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final MessagingService messagingService;
+
 
 
     public APIResponse requestRider(RequestRider request) {
@@ -67,6 +69,15 @@ public class RiderService {
 
             Request savedRequest = requestRepository.save(requestRider);
             if (savedRequest != null) {
+                String msg = "Hello "+" "+rider.getName()+" "+", a request has been made at"+" "+requestRider.getPickupLocation()+" " +
+                        "to be taken to a destination: "+requestRider.getDestination()+". Kindly confirm your availability.";
+                GmailDTO mail = GmailDTO.builder()
+                        .subject("REQUEST ORDER")
+                        .body(msg)
+                        .toEmail(rider.getEmail())
+                        .build();
+                messagingService.sendMail(mail);
+
                 return response.success(savedRequest);
             } else {
                 return response.failure("Unable to contact Rider!");
@@ -78,7 +89,6 @@ public class RiderService {
         Request existingRequest = requestRepository.findById(requestId).orElse(null);
         if (existingRequest == null)
             return response.failure("Unable to find this request ");
-
         if (request.getSize() != null)
             existingRequest.setSize(request.getSize());
         if (request.getDistance() != null)
@@ -94,6 +104,15 @@ public class RiderService {
 
         Request savedRequest = requestRepository.save(existingRequest);
         if (savedRequest != null) {
+            String msg = "Hello "+" "+existingRequest.getUserName()+"Your request update are follows:"+"\n"+" Destination:"+existingRequest.getDestination()+"" +
+                    "Status: "+existingRequest.getStatus()+"\n"+" "+" Amount to Pay: "+existingRequest.getPayableAmount();
+            GmailDTO mail = GmailDTO.builder()
+                    .subject("REQUEST UPDATE ORDER")
+                    .body(msg)
+                    .toEmail(existingRequest.getUserEmail())
+                    .build();
+            messagingService.sendMail(mail);
+
             return response.success(savedRequest);
         } else {
             return response.failure("Unable to update request!");
